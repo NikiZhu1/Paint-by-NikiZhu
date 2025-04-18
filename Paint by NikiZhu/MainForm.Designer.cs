@@ -51,6 +51,7 @@
             маToolStripMenuItem = new ToolStripMenuItem();
             масштабToolStripMenuItem = new ToolStripMenuItem();
             сброситьМасштабToolStripMenuItem = new ToolStripMenuItem();
+            фильтрыToolStripMenuItem = new ToolStripMenuItem();
             помощьToolStripMenuItem = new ToolStripMenuItem();
             оПрограммеToolStripMenuItem = new ToolStripMenuItem();
             flowLayoutPanel1 = new FlowLayoutPanel();
@@ -112,7 +113,7 @@
             // 
             // menuStrip1
             // 
-            menuStrip1.Items.AddRange(new ToolStripItem[] { файлToolStripMenuItem, рисунокToolStripMenuItem, видToolStripMenuItem, помощьToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { файлToolStripMenuItem, рисунокToolStripMenuItem, видToolStripMenuItem, фильтрыToolStripMenuItem, помощьToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.MdiWindowListItem = видToolStripMenuItem;
             menuStrip1.Name = "menuStrip1";
@@ -277,6 +278,13 @@
             сброситьМасштабToolStripMenuItem.Size = new Size(233, 22);
             сброситьМасштабToolStripMenuItem.Text = "&Сбросить масштаб";
             сброситьМасштабToolStripMenuItem.Click += scaleReset_Click;
+            // 
+            // фильтрыToolStripMenuItem
+            // 
+            фильтрыToolStripMenuItem.Name = "фильтрыToolStripMenuItem";
+            фильтрыToolStripMenuItem.Size = new Size(69, 20);
+            фильтрыToolStripMenuItem.Text = "Фильтры";
+            фильтрыToolStripMenuItem.DropDownOpening += фильтрыToolStripMenuItem_DropDownOpening;
             // 
             // помощьToolStripMenuItem
             // 
@@ -903,6 +911,8 @@
             Name = "MainForm";
             Text = "My Paint";
             toolTip1.SetToolTip(this, "File\r\nHOme\r\n");
+            WindowState = FormWindowState.Maximized;
+            Load += MainForm_Load;
             MdiChildActivate += MainForm_MdiChildActivate;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
@@ -1001,5 +1011,6 @@
         private ToolStripMenuItem рядомToolStripMenuItem;
         private TableLayoutPanel tableLayoutPanel3;
         public Button button_FontChoose;
+        private ToolStripMenuItem фильтрыToolStripMenuItem;
     }
 }

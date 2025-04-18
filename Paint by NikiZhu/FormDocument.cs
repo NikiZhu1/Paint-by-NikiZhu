@@ -8,7 +8,7 @@ namespace Paint_by_NikiZhu
         int oldX, oldY;
         public Bitmap bitmap; // Главный холст
         public Bitmap previewBitmap; // Временный холст для предпросмотра
-        bool isModified = false; // Флаг изменений
+        public bool isModified = false; // Флаг изменений
         private float scale = 1.0f; //Масштаб битмапа
         private bool isDragging = false; //Перемещение текста
 
@@ -16,14 +16,8 @@ namespace Paint_by_NikiZhu
 
         public float BitmapScale //Масштаб битмапа
         {
-            get
-            {
-                return scale;
-            }
-            set
-            {
-                scale = value;
-            }
+            get { return scale; }
+            set { scale = value; }
         }
 
         private static Cursor CreateCursor(Bitmap bmp, int xHotSpot, int yHotSpot)
@@ -518,6 +512,7 @@ namespace Paint_by_NikiZhu
                 MainForm.Tool == Tools.Cylinder)
 
                 Cursor = Cursors.Cross;
+
             else if (MainForm.Tool == Tools.Eraser)
                 Cursor = EraserCursor;
             else if (MainForm.Tool == Tools.Filler)

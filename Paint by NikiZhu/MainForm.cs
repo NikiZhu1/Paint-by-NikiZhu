@@ -1,8 +1,12 @@
+using PluginInterface;
+using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using MethodInvoker = System.Windows.Forms.MethodInvoker;
 
 namespace Paint_by_NikiZhu
 {
@@ -40,9 +44,17 @@ namespace Paint_by_NikiZhu
         /// </summary>
         public static Font SelectedFont { get; private set; } = new Font("Arial", 12);
 
+        /// <summary>
+        /// Загруженные плагины
+        /// </summary>
+        Dictionary<string, IPlugin> plugins = new Dictionary<string, IPlugin>();
+
         public MainForm()
         {
             InitializeComponent();
+            FindPlugins();
+            CreatePluginsMenu();
+
             CurrentColor = Color.Black;
             CurrentWidth = 5;
             Tool = Tools.Brush;
@@ -50,6 +62,98 @@ namespace Paint_by_NikiZhu
             label_CurrentWith.Text = $"{CurrentWidth} px";
             label_Scale.Text = "Масштаб: " + Convert.ToInt32(100 * 1.0f).ToString() + "%";
             trackBar_Scale.Value = Convert.ToInt32(100 * 1.0f);
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            // Показываем сообщение о плагинах после загрузки формы
+            ShowPluginsInfo();
+        }
+
+        private void ShowPluginsInfo()
+        {
+            if (plugins.Count > 0)
+            {
+                string LoadedPluginInfo = $"Загружено плагинов для трансформации изображения: {plugins.Count}\n\n";
+
+                int count = 1;
+                foreach (var plugin in plugins)
+                {
+                    LoadedPluginInfo += $"{count}. {plugin.Value.Name}\n";
+                    count++;
+                }
+
+                this.BeginInvoke((MethodInvoker)delegate
+                {
+                    MessageBox.Show(
+                        LoadedPluginInfo,
+                        "Загрузка плагинов",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                });
+            }
+        }
+
+        void FindPlugins()
+        {
+            // папка с плагинами
+            string folder = System.AppDomain.CurrentDomain.BaseDirectory;
+
+            // dll-файлы в этой папке
+            string[] files = Directory.GetFiles(folder, "*.dll");
+
+            foreach (string file in files)
+                try
+                {
+                    Assembly assembly = Assembly.LoadFile(file);
+
+                    foreach (Type type in assembly.GetTypes())
+                    {
+                        Type iface = type.GetInterface("PluginInterface.IPlugin");
+
+                        if (iface != null)
+                        {
+                            IPlugin plugin = (IPlugin)Activator.CreateInstance(type);
+                            plugins.Add(plugin.Name, plugin);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка загрузки плагина\n" + ex.Message);
+                }
+        }
+
+        private void CreatePluginsMenu()
+        {
+            foreach (var p in plugins)
+            {
+                var item = фильтрыToolStripMenuItem.DropDownItems.Add(p.Value.Name);
+                item.Click += OnPluginClick;
+            }
+        }
+
+        private void OnPluginClick(object sender, EventArgs args)
+        {
+            var activeDocument = this.ActiveMdiChild as FormDocument;
+
+            Cursor = Cursors.WaitCursor;
+            activeDocument.Cursor = Cursors.WaitCursor;
+            IPlugin plugin = plugins[((ToolStripMenuItem)sender).Text];
+            plugin.Transform(activeDocument.bitmap);
+            activeDocument.Refresh();
+            activeDocument.isModified = true;
+
+            Cursor = Cursors.Default;
+        }
+
+        private void фильтрыToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            foreach (ToolStripMenuItem item in фильтрыToolStripMenuItem.DropDownItems)
+            {
+                item.Enabled = (this.ActiveMdiChild != null);
+            }
         }
 
         private void выходToolStripMenuItem_Click(object sender, EventArgs e)
@@ -91,6 +195,7 @@ namespace Paint_by_NikiZhu
                 if (resizeForm.ShowDialog() == DialogResult.OK)
                 {
                     activeDocument.ResizeCanvas(resizeForm.CanvasWidth, resizeForm.CanvasHeight);
+                    UpdateBitmapSize(resizeForm.CanvasWidth, resizeForm.CanvasHeight);
                 }
             }
         }

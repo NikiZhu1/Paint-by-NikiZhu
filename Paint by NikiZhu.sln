@@ -5,6 +5,10 @@ VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Paint by NikiZhu", "Paint by NikiZhu\Paint by NikiZhu.csproj", "{EF7510B8-055A-4474-B13A-B7E96871ACB4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginInterface", "PluginInterface\PluginInterface.csproj", "{7E0757E6-DD05-4FA0-83FD-DE2F1D15F92A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginLibrary", "ClassLibrary1\PluginLibrary.csproj", "{965F8AC1-6641-4F74-A25E-5E79FE6A4428}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{EF7510B8-055A-4474-B13A-B7E96871ACB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF7510B8-055A-4474-B13A-B7E96871ACB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF7510B8-055A-4474-B13A-B7E96871ACB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E0757E6-DD05-4FA0-83FD-DE2F1D15F92A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E0757E6-DD05-4FA0-83FD-DE2F1D15F92A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E0757E6-DD05-4FA0-83FD-DE2F1D15F92A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E0757E6-DD05-4FA0-83FD-DE2F1D15F92A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{965F8AC1-6641-4F74-A25E-5E79FE6A4428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{965F8AC1-6641-4F74-A25E-5E79FE6A4428}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{965F8AC1-6641-4F74-A25E-5E79FE6A4428}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{965F8AC1-6641-4F74-A25E-5E79FE6A4428}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
