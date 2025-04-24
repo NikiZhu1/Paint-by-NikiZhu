@@ -15,7 +15,7 @@ namespace PluginLibrary
             get { return "Me"; }
         }
 
-        public void Transform(Bitmap bitmap)
+        public void Transform(Bitmap bitmap, CancellationToken token, IProgress<int> progress)
         {
             for (int i = 0; i < bitmap.Width; ++i)
                 for (int j = 0; j < bitmap.Height / 2; ++j)

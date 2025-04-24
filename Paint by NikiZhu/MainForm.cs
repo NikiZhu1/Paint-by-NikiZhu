@@ -5,6 +5,8 @@ using System.Drawing.Imaging;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Windows.Forms;
 using MethodInvoker = System.Windows.Forms.MethodInvoker;
 
@@ -48,6 +50,37 @@ namespace Paint_by_NikiZhu
         /// Загруженные плагины
         /// </summary>
         Dictionary<string, IPlugin> plugins = new Dictionary<string, IPlugin>();
+
+        string configPath = "plugins_config.json";
+        PluginConfig config;
+
+        CancellationTokenSource pluginCancellationSource;
+        bool pluginRunning = false;
+
+        void LoadPluginConfig()
+        {
+            if (File.Exists(configPath))
+            {
+                string json = File.ReadAllText(configPath);
+                config = JsonSerializer.Deserialize<PluginConfig>(json);
+            }
+            else
+            {
+                config = new PluginConfig();
+            }
+        }
+
+        void SavePluginConfig()
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            string json = JsonSerializer.Serialize(config, options);
+            File.WriteAllText(configPath, json);
+        }
 
         public MainForm()
         {
@@ -97,6 +130,8 @@ namespace Paint_by_NikiZhu
 
         void FindPlugins()
         {
+            LoadPluginConfig();
+
             // папка с плагинами
             string folder = System.AppDomain.CurrentDomain.BaseDirectory;
 
@@ -110,12 +145,19 @@ namespace Paint_by_NikiZhu
 
                     foreach (Type type in assembly.GetTypes())
                     {
-                        Type iface = type.GetInterface("PluginInterface.IPlugin");
-
-                        if (iface != null)
+                        if (type.GetInterface("PluginInterface.IPlugin") != null)
                         {
                             IPlugin plugin = (IPlugin)Activator.CreateInstance(type);
-                            plugins.Add(plugin.Name, plugin);
+                            var configEntry = config.Plugins.FirstOrDefault(p => p.Name == plugin.Name);
+
+                            if (configEntry == null)
+                            {
+                                configEntry = new PluginConfigEntry { Name = plugin.Name, Enabled = true };
+                                config.Plugins.Add(configEntry);
+                            }
+
+                            if (configEntry.Enabled)
+                                plugins[plugin.Name] = plugin;
                         }
                     }
                 }
@@ -123,6 +165,8 @@ namespace Paint_by_NikiZhu
                 {
                     MessageBox.Show("Ошибка загрузки плагина\n" + ex.Message);
                 }
+
+            SavePluginConfig();
         }
 
         private void CreatePluginsMenu()
@@ -134,18 +178,75 @@ namespace Paint_by_NikiZhu
             }
         }
 
-        private void OnPluginClick(object sender, EventArgs args)
+        private async void OnPluginClick(object sender, EventArgs args)
         {
+            if (pluginRunning)
+            {
+                MessageBox.Show("Операция уже выполняется");
+                return;
+            }
+
             var activeDocument = this.ActiveMdiChild as FormDocument;
+            if (activeDocument == null || activeDocument.bitmap == null)
+                return;
 
-            Cursor = Cursors.WaitCursor;
-            activeDocument.Cursor = Cursors.WaitCursor;
             IPlugin plugin = plugins[((ToolStripMenuItem)sender).Text];
-            plugin.Transform(activeDocument.bitmap);
-            activeDocument.Refresh();
-            activeDocument.isModified = true;
 
-            Cursor = Cursors.Default;
+            // Создаём копию изображения
+            Bitmap original = (Bitmap)activeDocument.bitmap.Clone();
+            pluginCancellationSource = new CancellationTokenSource();
+            CancellationToken token = pluginCancellationSource.Token;
+
+            try
+            {
+                pluginRunning = true;
+                Cursor = Cursors.WaitCursor;
+                activeDocument.Cursor = Cursors.WaitCursor;
+                PluginProgress.Visible = true;
+                progressBar.Value = 0;
+
+                var progress = new Progress<int>(value =>
+                {
+                    progressBar.Value = Math.Min(100, Math.Max(0, value));
+                });
+
+                // Выполняем плагин в фоне
+                await Task.Run(() =>
+                {
+                    if (token.IsCancellationRequested)
+                        token.ThrowIfCancellationRequested();
+
+                    plugin.Transform(original, token, progress);
+
+                    if (token.IsCancellationRequested)
+                        token.ThrowIfCancellationRequested();
+                }, token);
+
+                // После завершения — обновляем оригинал
+                activeDocument.bitmap = original;
+                activeDocument.Refresh();
+                activeDocument.isModified = true;
+            }
+            catch (AggregateException aggEx) when (aggEx.InnerExceptions.Any(e => e is OperationCanceledException))
+            {
+                MessageBox.Show("Операция была отменена.");
+                original.Dispose();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка применения фильтра: " + ex.Message);
+                original.Dispose();
+            }
+            finally
+            {
+                Cursor = Cursors.Default;
+                activeDocument.Cursor = Cursors.Default;
+                pluginRunning = false;
+                pluginCancellationSource.Dispose();
+                pluginCancellationSource = null;
+                progressBar.Value = 0;
+                PluginProgress.Visible = false;
+            }
         }
 
         private void фильтрыToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
@@ -494,6 +595,14 @@ namespace Paint_by_NikiZhu
                     activeDocument.textBoxPaint.Width = Math.Max(activeDocument.textBoxPaint.Width, textSize.Width + 10);
 
                 }
+            }
+        }
+
+        private void buttonCancelPlugin_Click(object sender, EventArgs e)
+        {
+            if (pluginRunning && pluginCancellationSource != null)
+            {
+                pluginCancellationSource.Cancel();
             }
         }
     }

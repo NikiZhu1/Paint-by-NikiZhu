@@ -91,12 +91,16 @@
             trackBar_Width = new TrackBar();
             label_CurrentWith = new Label();
             label3 = new Label();
+            buttonCancelPlugin = new Button();
             statusStrip1 = new StatusStrip();
             label_Cordinates = new ToolStripStatusLabel();
             label_Size = new ToolStripStatusLabel();
             tableLayoutPanel5 = new TableLayoutPanel();
             trackBar_Scale = new TrackBar();
             label_Scale = new Label();
+            PluginProgress = new TableLayoutPanel();
+            progressBar = new ProgressBar();
+            label4 = new Label();
             menuStrip1.SuspendLayout();
             flowLayoutPanel1.SuspendLayout();
             panel1.SuspendLayout();
@@ -109,6 +113,7 @@
             statusStrip1.SuspendLayout();
             tableLayoutPanel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_Scale).BeginInit();
+            PluginProgress.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -823,6 +828,20 @@
             label3.TabIndex = 10;
             label3.Text = "Толщина";
             // 
+            // buttonCancelPlugin
+            // 
+            buttonCancelPlugin.Cursor = Cursors.Hand;
+            buttonCancelPlugin.Dock = DockStyle.Fill;
+            buttonCancelPlugin.Location = new Point(339, 0);
+            buttonCancelPlugin.Margin = new Padding(0);
+            buttonCancelPlugin.Name = "buttonCancelPlugin";
+            buttonCancelPlugin.Size = new Size(75, 24);
+            buttonCancelPlugin.TabIndex = 0;
+            buttonCancelPlugin.Text = "Отмена";
+            buttonCancelPlugin.UseMnemonic = false;
+            buttonCancelPlugin.UseVisualStyleBackColor = true;
+            buttonCancelPlugin.Click += buttonCancelPlugin_Click;
+            // 
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { label_Cordinates, label_Size });
@@ -895,11 +914,49 @@
             label_Scale.Text = "Масштаб: 100%";
             label_Scale.TextAlign = ContentAlignment.MiddleRight;
             // 
+            // PluginProgress
+            // 
+            PluginProgress.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            PluginProgress.ColumnCount = 3;
+            PluginProgress.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 44.5427742F));
+            PluginProgress.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55.4572258F));
+            PluginProgress.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 74F));
+            PluginProgress.Controls.Add(buttonCancelPlugin, 2, 0);
+            PluginProgress.Controls.Add(progressBar, 1, 0);
+            PluginProgress.Controls.Add(label4, 0, 0);
+            PluginProgress.Location = new Point(392, 649);
+            PluginProgress.Name = "PluginProgress";
+            PluginProgress.RowCount = 1;
+            PluginProgress.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            PluginProgress.Size = new Size(414, 24);
+            PluginProgress.TabIndex = 13;
+            PluginProgress.Visible = false;
+            // 
+            // progressBar
+            // 
+            progressBar.Dock = DockStyle.Fill;
+            progressBar.Location = new Point(154, 3);
+            progressBar.Name = "progressBar";
+            progressBar.Size = new Size(182, 18);
+            progressBar.TabIndex = 15;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Dock = DockStyle.Fill;
+            label4.Location = new Point(3, 0);
+            label4.Name = "label4";
+            label4.Size = new Size(145, 24);
+            label4.TabIndex = 16;
+            label4.Text = "Применение эффекта:";
+            label4.TextAlign = ContentAlignment.MiddleRight;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1089, 673);
+            Controls.Add(PluginProgress);
             Controls.Add(tableLayoutPanel5);
             Controls.Add(statusStrip1);
             Controls.Add(panel1);
@@ -933,6 +990,8 @@
             tableLayoutPanel5.ResumeLayout(false);
             tableLayoutPanel5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trackBar_Scale).EndInit();
+            PluginProgress.ResumeLayout(false);
+            PluginProgress.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -1012,5 +1071,9 @@
         private TableLayoutPanel tableLayoutPanel3;
         public Button button_FontChoose;
         private ToolStripMenuItem фильтрыToolStripMenuItem;
+        private TableLayoutPanel PluginProgress;
+        private Button buttonCancelPlugin;
+        private ProgressBar progressBar;
+        private Label label4;
     }
 }

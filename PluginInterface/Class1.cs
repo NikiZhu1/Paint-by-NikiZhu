@@ -8,6 +8,6 @@ namespace PluginInterface
 
         string Author { get; }
 
-        void Transform(Bitmap app);
+        void Transform(Bitmap app, CancellationToken token, IProgress<int> progress);
     }
 }

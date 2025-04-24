@@ -1,6 +1,7 @@
 ﻿using PluginInterface;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,11 @@ namespace PluginLibrary
             get { return "Me"; }
         }
 
-        public void Transform(Bitmap bitmap)
+        public void Transform(Bitmap bitmap, CancellationToken token, IProgress<int> progress)
         {
-            int frameWidth = 20;
+            int frameWidth = 30;
+            token.ThrowIfCancellationRequested();
+
             Color borderColor = GeneratePleasantRandomColor();
 
             using (Graphics g = Graphics.FromImage(bitmap))
@@ -38,16 +41,22 @@ namespace PluginLibrary
                 using (TextureBrush brush = CreateTextureBrush(borderColor, 200))
                 using (Pen framePen = new Pen(brush, frameWidth))
                 {
+                    token.ThrowIfCancellationRequested();
+
                     // Рисуем рамку по краям изображения
                     g.DrawRectangle(framePen,
                         frameWidth / 2,
                         frameWidth / 2,
                         bitmap.Width - frameWidth,
                         bitmap.Height - frameWidth);
+
+                    progress?.Report(20);
                 }
 
+                token.ThrowIfCancellationRequested();
+
                 // Добавляем декоративные уголки
-                AddCornerDecorations(g, bitmap.Width, bitmap.Height, frameWidth, borderColor);
+                AddCornerDecorations(g, bitmap.Width, bitmap.Height, frameWidth, borderColor, progress);
             }
         }
 
@@ -71,7 +80,7 @@ namespace PluginLibrary
             return new TextureBrush(texture);
         }
 
-        private void AddCornerDecorations(Graphics g, int width, int height, int frameWidth, Color color)
+        private void AddCornerDecorations(Graphics g, int width, int height, int frameWidth, Color color, IProgress<int> progress)
         {
             int triangleSize = frameWidth * 2;
             Pen trianglePen = new Pen(DarkenColor(color, 0.2f), 2);
@@ -107,14 +116,22 @@ namespace PluginLibrary
 
             // Рисуем все 4 треугольника
             g.FillPolygon(triangleBrush, topLeftTriangle);
+            progress?.Report(30);
             g.FillPolygon(triangleBrush, topRightTriangle);
+            progress?.Report(40);
             g.FillPolygon(triangleBrush, bottomLeftTriangle);
+            progress?.Report(50);
             g.FillPolygon(triangleBrush, bottomRightTriangle);
+            progress?.Report(60);
 
             g.DrawPolygon(trianglePen, topLeftTriangle);
+            progress?.Report(70);
             g.DrawPolygon(trianglePen, topRightTriangle);
+            progress?.Report(80);
             g.DrawPolygon(trianglePen, bottomLeftTriangle);
+            progress?.Report(90);
             g.DrawPolygon(trianglePen, bottomRightTriangle);
+            progress?.Report(100);
         }
 
         private Color DarkenColor(Color color, float factor)
